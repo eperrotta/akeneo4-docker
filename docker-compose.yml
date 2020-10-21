@@ -32,8 +32,8 @@ services:
       BLACKFIRE_CLIENT_TOKEN: '${BLACKFIRE_CLIENT_TOKEN:-client_token}'
     volumes:
       - './public_html/:/srv/pim'
+      - 'phpsession:/var/lib/php/sessions'
     working_dir: '/srv/pim'
-    command: 'php-fpm7.3 -F'
     networks:
       - pim
 
@@ -94,3 +94,4 @@ networks:
 volumes:
   mysql8data:
   es75data:
+  phpsession:
