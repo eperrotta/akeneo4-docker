@@ -33,6 +33,7 @@ services:
     volumes:
       - './public_html/:/srv/pim'
       - 'phpsession:/var/lib/php/sessions'
+      - './docker/fpm/pool.d/akeneo.conf:/etc/php/7.3/fpm/pool.d/akeneo.conf'
     working_dir: '/srv/pim'
     networks:
       - pim
