@@ -33,7 +33,7 @@ services:
     volumes:
       - './public_html/:/srv/pim'
     working_dir: '/srv/pim'
-    command: 'php-fpm -F'
+    command: 'php-fpm7.3 -F'
     networks:
       - pim
 
