@@ -1,0 +1,96 @@
+version: '3.4'
+
+services:
+  php:
+    image: 'akeneo/php:7.3'
+    environment:
+      APP_ENV: '${APP_ENV:-prod}'
+      COMPOSER_HOME: '/var/www/.composer'
+      PHP_IDE_CONFIG: 'serverName=pim-docker-cli'
+      XDEBUG_ENABLED: '${XDEBUG_ENABLED:-0}'
+      XDEBUG_CONFIG: 'remote_host=172.17.0.1'
+      BLACKFIRE_CLIENT_ID: '${BLACKFIRE_CLIENT_ID:-client_id}'
+      BLACKFIRE_CLIENT_TOKEN: '${BLACKFIRE_CLIENT_TOKEN:-client_token}'
+    volumes:
+      - './public_html/:/srv/pim'
+      - '${HOST_COMPOSER_HOME:-~/.composer}:/var/www/.composer'
+    working_dir: '/srv/pim'
+    command: 'php'
+    networks:
+      - pim
+
+  fpm:
+    image: 'akeneo/fpm:php-7.3'
+    environment:
+      APP_ENV: '${APP_ENV:-prod}'
+      BEHAT_TMPDIR: '/srv/pim/var/cache/tmp'
+      BEHAT_SCREENSHOT_PATH: '/srv/pim/var/tests/screenshots'
+      PHP_IDE_CONFIG: 'serverName=pim-docker-web'
+      XDEBUG_ENABLED: '${XDEBUG_ENABLED:-0}'
+      XDEBUG_CONFIG: 'remote_host=172.17.0.1'
+      BLACKFIRE_CLIENT_ID: '${BLACKFIRE_CLIENT_ID:-client_id}'
+      BLACKFIRE_CLIENT_TOKEN: '${BLACKFIRE_CLIENT_TOKEN:-client_token}'
+    volumes:
+      - './public_html/:/srv/pim'
+    working_dir: '/srv/pim'
+    command: 'php-fpm -F'
+    networks:
+      - pim
+
+  node:
+    image: 'akeneo/node:10'
+    environment:
+      YARN_CACHE_FOLDER: '/home/node/.yarn'
+    volumes:
+      - './public_html/:/srv/pim'
+      - '${HOST_YARN_CACHE_FOLDER:-~/.cache/yarn}:/home/node/.yarn'
+    working_dir: '/srv/pim'
+    networks:
+      - pim
+
+  nginx:
+    image: nginx:1.13
+    ports:
+      - "8080:80"
+    networks:
+      - pim
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    volumes_from:
+      - fpm:ro
+    depends_on:
+      - fpm
+
+  mysql:
+    image: 'mysql:8.0.18'
+    command: '--default-authentication-plugin=mysql_native_password'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_USER: '${APP_DATABASE_USER}'
+      MYSQL_DATABASE: '${APP_DATABASE_NAME}'
+      MYSQL_PASSWORD: '${APP_DATABASE_PASSWORD}'
+    ports:
+      - '${DOCKER_PORT_MYSQL:-3366}:3306'
+    volumes:
+      - mysql8data:/var/lib/mysql
+    networks:
+      - pim
+
+  elasticsearch:
+    image: 'docker.elastic.co/elasticsearch/elasticsearch-oss:7.5.1'
+    environment:
+      ES_JAVA_OPTS: '${ES_JAVA_OPTS:--Xms512m -Xmx512m}'
+      discovery.type: 'single-node'
+    ports:
+      - '${DOCKER_PORT_ELASTICSEARCH:-9210}:9200'
+    volumes:
+      - es75data:/usr/share/elasticsearch/data
+    networks:
+      - pim
+
+networks:
+  pim:
+
+volumes:
+  mysql8data:
+  es75data:
