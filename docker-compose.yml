@@ -2,7 +2,9 @@ version: '3.4'
 
 services:
   php:
-    image: 'akeneo/php:7.3'
+    build:
+      context: './docker/php'
+      dockerfile: Dockerfile
     environment:
       APP_ENV: '${APP_ENV:-prod}'
       COMPOSER_HOME: '/var/www/.composer'
