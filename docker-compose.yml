@@ -72,8 +72,6 @@ services:
       MYSQL_USER: '${APP_DATABASE_USER}'
       MYSQL_DATABASE: '${APP_DATABASE_NAME}'
       MYSQL_PASSWORD: '${APP_DATABASE_PASSWORD}'
-    ports:
-      - '${DOCKER_PORT_MYSQL:-3366}:3306'
     volumes:
       - mysql8data:/var/lib/mysql
     networks:
@@ -84,8 +82,6 @@ services:
     environment:
       ES_JAVA_OPTS: '${ES_JAVA_OPTS:--Xms512m -Xmx512m}'
       discovery.type: 'single-node'
-    ports:
-      - '${DOCKER_PORT_ELASTICSEARCH:-9210}:9200'
     volumes:
       - es75data:/usr/share/elasticsearch/data
     networks:
