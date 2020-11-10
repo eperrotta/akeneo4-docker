@@ -5,3 +5,5 @@ public_html/
 # Files
 .DS_Store
 *.gz
+
+.env
